@@ -89,7 +89,7 @@ The full environment variable reference lives in [`.env.example`](.env.example) 
 - [`docs/API.md`](docs/API.md) - REST API reference
 - [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) - Docker, docker-compose, and production notes
 - [`postman/`](postman) - a ready-to-import Postman collection for exercising the API without writing curl commands
-- [`openapi/`](openapi) - a generated OpenAPI 3.1 spec for this API, ready to import into a gateway (WSO2 or otherwise)
+- [`app/openapi/`](app/openapi) - a generated OpenAPI 3.1 spec for this API, ready to import into a gateway (WSO2 or otherwise)
 
 ## Project layout
 
@@ -104,11 +104,11 @@ app/
     chat_service.py            Per-session history + retrieval + model call
   api/routes.py               /api/health, /api/config, /api/chat(+stream), /api/reset
   models/schemas.py           Request/response models
+  openapi/                    Generated OpenAPI 3.1 spec for uploading to a gateway
 frontend/                    Static chat UI (no build step)
 docs/                        Deep-dive documentation
 postman/                     Postman collection + environment for exercising the API
-openapi/                     Generated OpenAPI 3.1 spec for uploading to a gateway
-scripts/export_openapi.py    Regenerates openapi/openapi.yaml from the live app
+scripts/export_openapi.py    Regenerates app/openapi/openapi.yaml from the live app
 Dockerfile, docker-compose.yml, .dockerignore
 requirements.txt, requirements-dev.txt, .env.example
 ```

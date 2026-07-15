@@ -1,4 +1,4 @@
-"""Exports the FastAPI app's OpenAPI schema to openapi/openapi.yaml.
+"""Exports the FastAPI app's OpenAPI schema to app/openapi/openapi.yaml.
 
 The schema is generated from the actual routes and Pydantic models in
 app/api/routes.py and app/models/schemas.py - never hand-edit the YAML file
@@ -18,7 +18,7 @@ import yaml
 
 from app.main import app
 
-OUTPUT_PATH = Path(__file__).resolve().parent.parent / "openapi" / "openapi.yaml"
+OUTPUT_PATH = Path(__file__).resolve().parent.parent / "app" / "openapi" / "openapi.yaml"
 
 
 def main() -> None:
