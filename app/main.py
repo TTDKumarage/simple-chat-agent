@@ -16,7 +16,11 @@ logger = logging.getLogger("simple-chat-agent")
 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 
-app = FastAPI(title=settings.app_name)
+app = FastAPI(
+    title=settings.app_name,
+    version="1.0.0",
+    description="Provider-agnostic LangChain chat backend with optional Pinecone-backed retrieval.",
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -31,7 +35,7 @@ app.include_router(router, prefix="/api")
 if FRONTEND_DIR.exists():
     app.mount("/static", StaticFiles(directory=FRONTEND_DIR / "static"), name="static")
 
-    @app.get("/")
+    @app.get("/", include_in_schema=False)
     async def index() -> FileResponse:
         return FileResponse(FRONTEND_DIR / "index.html")
 
@@ -44,3 +48,9 @@ async def log_startup_config() -> None:
         settings.llm_provider.value,
         settings.rag_enabled,
     )
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run("app.main:app", host=settings.host, port=settings.port)

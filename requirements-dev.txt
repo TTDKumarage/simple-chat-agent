@@ -1,0 +1,5 @@
+# Tooling-only dependencies - not needed to run the service itself (see
+# requirements.txt for that), only for developer scripts such as
+# scripts/export_openapi.py.
+-r requirements.txt
+pyyaml>=6.0
