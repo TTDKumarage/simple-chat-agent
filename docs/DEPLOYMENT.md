@@ -19,7 +19,23 @@ cp .env.example .env
 docker compose up --build
 ```
 
-`docker-compose.yml` builds the image, maps port 8000, loads `.env`, restarts unless stopped, and wires up the same health check as the Dockerfile. There's no database or cache service to compose alongside it - the only external dependencies are whichever LLM provider/gateway you've configured and (optionally) Pinecone, both of which are reached over the network rather than run as sidecar containers.
+`docker-compose.yml` builds the image, maps port 8000, loads `.env`, restarts unless stopped, and wires up the same health check as the Dockerfile. It defines exactly one service - there's no separate frontend service or database/cache to compose alongside it, since the single image already serves both the API and the static chat UI (see below), and the only external dependencies are whichever LLM provider/gateway you've configured and (optionally) Pinecone, both reached over the network rather than run as sidecar containers. It's purely a local-`docker compose up` convenience - not required by, and not read by, `docker build` or any platform that builds directly from a Dockerfile (Choreo, ECS, Cloud Run, etc.).
+
+## Backend-only image (no bundled frontend)
+
+The root `Dockerfile` bundles both the API and the static chat UI in one image - `app/main.py` mounts `/static` and serves `frontend/index.html` at `/` only when the `frontend/` directory is present at startup (`if FRONTEND_DIR.exists():`). `Dockerfile.backend` is the same image with that `COPY frontend ./frontend` line dropped, so it serves only the JSON API (`/api/health`, `/api/config`, `/api/chat`, `/api/chat/stream`, `/api/reset`) - `/` and `/static/*` 404. No code changes needed; the app already handles a missing frontend directory gracefully.
+
+```bash
+docker build -f Dockerfile.backend -t simple-chat-agent-backend .
+docker run -d --name simple-chat-agent-backend \
+  -p 8000:8000 \
+  --env-file .env \
+  simple-chat-agent-backend
+```
+
+Use this when something else serves as the client - a gateway (e.g. WSO2 AI Gateway / Choreo), the Postman collection, or your own frontend - and you don't want the built-in chat page shipped in the image at all.
+
+**Choreo-specific note:** if Choreo auto-detected this as a Python component (buildpack-based), it isn't reading either Dockerfile - you'd need to explicitly configure the component as a Docker-based build and point it at `Dockerfile.backend` (or the root `Dockerfile`, if you do want the bundled UI) to actually use it.
 
 ## Configuration in production
 
