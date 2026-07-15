@@ -1,0 +1,270 @@
+{
+  "info": {
+    "_postman_id": "6f2b1a2e-6b0a-4e9a-9f7e-3a2b8c9d0e11",
+    "name": "Simple Chat Agent",
+    "description": "REST API for the Simple Chat Agent backend. Covers health/config checks and both chat modes (blocking and streaming). See docs/API.md in the repo for full endpoint documentation.\n\nBefore using this collection:\n1. Make sure the backend is running (`docker compose up` or `uvicorn app.main:app`).\n2. Set the `base_url` collection variable if it isn't running on `http://localhost:8000`.\n\nHow session_id works here: leave the `session_id` collection variable blank and just run **Chat (blocking)** or **Chat (streaming)** - the backend generates one and returns it (in the JSON body, or the `X-Session-Id` header for the streaming request), and each request's test script automatically saves it back into the `session_id` variable. Every following request in this collection then reuses it automatically, continuing the same conversation. Run **New Conversation** whenever you want to drop the current one and start over.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Reports ok', function () {",
+              "    pm.expect(pm.response.json().status).to.eql('ok');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/health",
+          "host": ["{{base_url}}"],
+          "path": ["api", "health"]
+        },
+        "description": "Liveness probe. Always 200 once the process is up."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Active Config",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/config",
+          "host": ["{{base_url}}"],
+          "path": ["api", "config"]
+        },
+        "description": "Shows the active (non-secret) provider/model/RAG configuration - useful for confirming which provider is actually answering before you send a chat message."
+      },
+      "response": []
+    },
+    {
+      "name": "Chat (blocking)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Reply is a non-empty string', function () {",
+              "    var body = pm.response.json();",
+              "    pm.expect(body.reply).to.be.a('string').and.not.empty;",
+              "});",
+              "",
+              "// Save the (possibly server-generated) session_id so the next",
+              "// request in this collection continues the same conversation.",
+              "var body = pm.response.json();",
+              "if (body.session_id) {",
+              "    pm.collectionVariables.set('session_id', body.session_id);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"session_id\": \"{{session_id}}\",\n  \"message\": \"{{message}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/chat",
+          "host": ["{{base_url}}"],
+          "path": ["api", "chat"]
+        },
+        "description": "Waits for the full model response before returning.\n\n`session_id` can be left blank ({{session_id}} resolves to an empty string) for the first message - the backend generates one, returns it in the response body, and this request's test script saves it into the `session_id` collection variable automatically. Just run it again to continue the conversation."
+      },
+      "response": []
+    },
+    {
+      "name": "Chat (streaming)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "// The streamed body is raw text (no JSON envelope), so the",
+              "// (possibly server-generated) session_id comes back as a",
+              "// response header instead - save it the same way.",
+              "var sessionId = pm.response.headers.get('X-Session-Id');",
+              "if (sessionId) {",
+              "    pm.collectionVariables.set('session_id', sessionId);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"session_id\": \"{{session_id}}\",\n  \"message\": \"{{message}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/chat/stream",
+          "host": ["{{base_url}}"],
+          "path": ["api", "chat", "stream"]
+        },
+        "description": "Same request shape as Chat (blocking), and `session_id` can be left blank the same way. The response is plain text streamed as it's generated - Postman buffers it and shows the complete text once the stream ends rather than rendering it incrementally, so functionally this looks the same as the blocking endpoint here, but it's what the web frontend uses for token-by-token display. Since the body is raw text, the (possibly generated) session_id comes back as the `X-Session-Id` response header instead of in the body - check the Headers tab of the response."
+      },
+      "response": []
+    },
+    {
+      "name": "Reset Session",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Reset confirmed', function () {",
+              "    pm.expect(pm.response.json().reset).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"session_id\": \"{{session_id}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/reset",
+          "host": ["{{base_url}}"],
+          "path": ["api", "reset"]
+        },
+        "description": "Clears the in-memory conversation history for the current `session_id`, without changing the ID itself. Use this to start a fresh conversation on the same session."
+      },
+      "response": []
+    },
+    {
+      "name": "New Conversation (clear session_id)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Clearing session_id makes the next Chat request send an empty",
+              "// value, which the backend treats as \"generate a new session\".",
+              "pm.collectionVariables.set('session_id', '');"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/health",
+          "host": ["{{base_url}}"],
+          "path": ["api", "health"]
+        },
+        "description": "Not a real endpoint call in itself (it just hits the health check) - its job is the pre-request script, which clears the `session_id` collection variable. Run this whenever you want to abandon the current conversation; the next Chat (blocking) or Chat (streaming) request will then generate and adopt a brand new session_id."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "session_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "message",
+      "value": "Hello! What can you help me with?",
+      "type": "string"
+    }
+  ]
+}

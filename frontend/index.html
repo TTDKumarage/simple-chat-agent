@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple Chat Agent</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <h1 id="app-title">Simple Chat Agent</h1>
+      <div id="provider-badge" class="badge">loading…</div>
+    </header>
+
+    <main id="chat-window" class="chat-window"></main>
+
+    <form id="chat-form" class="chat-form">
+      <textarea
+        id="chat-input"
+        placeholder="Ask something…"
+        rows="1"
+        autofocus
+      ></textarea>
+      <button type="submit" id="send-button">Send</button>
+      <button type="button" id="reset-button" title="Clear conversation">Reset</button>
+    </form>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
