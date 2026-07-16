@@ -37,6 +37,21 @@ Use this when something else serves as the client - a gateway (e.g. WSO2 AI Gate
 
 **Choreo-specific note:** if Choreo auto-detected this as a Python component (buildpack-based), it isn't reading either Dockerfile - you'd need to explicitly configure the component as a Docker-based build and point it at `Dockerfile.backend` (or the root `Dockerfile`, if you do want the bundled UI) to actually use it.
 
+## WSO2 Agent Manager tracing (AMP)
+
+`Dockerfile.backend` installs `amp-instrumentation==0.3.0` and wraps the launch command with `amp-instrument`, per WSO2 Agent Manager's OTEL requirement for Docker-based agents. This is zero-code - no app code reads these directly; `amp-instrument` injects a `sitecustomize.py` via `PYTHONPATH` that configures a Traceloop-based OTLP exporter before the app starts.
+
+Set these two as runtime environment variables (through Choreo's own config/secret mechanism - never bake real values into the image):
+
+```env
+AMP_OTEL_ENDPOINT=<OTLP endpoint URL from your Agent Manager component>
+AMP_AGENT_API_KEY=<agent-specific key from your Agent Manager component>
+```
+
+Leaving them unset doesn't break anything - verified directly against the package's own source (`amp_instrumentation` 0.3.0): its `sitecustomize.py` catches the missing-config error internally, logs `ERROR: Failed to initialize WSO2 AMP instrumentation: ...` to stderr, and the app starts and serves normally regardless. So this Dockerfile works the same for anyone who doesn't use WSO2 Agent Manager at all.
+
+**Known limitation, also verified against the actual source:** `amp-instrument` launches the wrapped command via `subprocess.run()`, not by exec-replacing itself - so `uvicorn` runs as `amp-instrument`'s child process rather than as the container's real PID 1. `exec` in the `CMD` still removes the outer shell layer, but a `SIGTERM` sent to the container isn't guaranteed to propagate from `amp-instrument` down to `uvicorn` for a graceful shutdown; in-flight requests during a stop/restart may get cut off once the platform's grace period elapses and force-kills the container. That's a constraint of the WSO2 package itself, not something this Dockerfile can fix.
+
 ## Configuration in production
 
 Don't bake `.env` into the image (it's excluded via `.dockerignore`). Inject configuration through your platform's secret/config mechanism instead:

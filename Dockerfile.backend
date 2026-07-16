@@ -13,6 +13,14 @@ RUN apt-get update \
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
+# WSO2 Agent Manager's OTEL tracing requirement for Docker-based agents:
+# zero-code instrumentation via a sitecustomize.py + PYTHONPATH shim that
+# amp-instrument injects around the wrapped command below. Pinned to the
+# version WSO2's docs specify - see their AMP instrumentation version
+# mapping before bumping it, since each release pins a specific Traceloop
+# SDK version.
+RUN pip install amp-instrumentation==0.3.0
+
 # Backend only - no frontend/ here. app/main.py checks for that directory at
 # startup and simply skips mounting the static UI and "/" route when it's
 # absent, so this serves the JSON API (/api/health, /api/config, /api/chat,
@@ -34,4 +42,19 @@ ENV PORT=8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD curl -fsS http://localhost:${PORT}/api/health || exit 1
 
-CMD exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT}
+# Provide AMP_OTEL_ENDPOINT and AMP_AGENT_API_KEY as runtime environment
+# variables (never bake real values into the image) to actually enable
+# tracing. Without them, amp-instrument still starts the app normally -
+# amp_instrumentation's own sitecustomize.py catches the missing-config
+# error internally and just logs it, it doesn't fail the process.
+#
+# Known limitation (verified against amp-instrumentation 0.3.0's actual
+# source): amp-instrument launches uvicorn via subprocess.run(), not by
+# exec-replacing itself, so uvicorn runs as amp-instrument's child rather
+# than as the container's real PID 1. `exec` here still removes the shell
+# layer, but SIGTERM sent to the container is not guaranteed to propagate
+# from amp-instrument down to uvicorn for a graceful shutdown - in-flight
+# requests during a stop/restart may be cut off once the platform's grace
+# period elapses and force-kills the container. This is a constraint of
+# WSO2's package, not something fixable from this Dockerfile.
+CMD exec amp-instrument uvicorn app.main:app --host 0.0.0.0 --port ${PORT}
