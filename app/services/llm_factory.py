@@ -24,6 +24,7 @@ from app.config import LLMProvider, Settings, get_settings
 from app.core.errors import ConfigurationError as LLMConfigurationError
 from app.core.errors import parse_headers as _parse_headers
 from app.core.errors import require as _require
+from app.core.errors import substitute_api_key as _substitute_api_key
 
 
 def _common_kwargs(settings: Settings) -> dict[str, Any]:
@@ -78,13 +79,13 @@ def _build_gemini(settings: Settings) -> BaseChatModel:
 def _build_custom_openai(settings: Settings) -> BaseChatModel:
     from langchain_openai import ChatOpenAI
 
+    api_key = _require(settings.custom_openai_api_key, "CUSTOM_OPENAI_API_KEY")
+    headers = _parse_headers(settings.custom_openai_extra_headers, "CUSTOM_OPENAI_EXTRA_HEADERS")
     return ChatOpenAI(
         model=_require(settings.custom_openai_model, "CUSTOM_OPENAI_MODEL"),
-        api_key=_require(settings.custom_openai_api_key, "CUSTOM_OPENAI_API_KEY"),
+        api_key=api_key,
         base_url=_require(settings.custom_openai_base_url, "CUSTOM_OPENAI_BASE_URL"),
-        default_headers=_parse_headers(
-            settings.custom_openai_extra_headers, "CUSTOM_OPENAI_EXTRA_HEADERS"
-        ),
+        default_headers=_substitute_api_key(headers, api_key),
         **_common_kwargs(settings),
     )
 
@@ -92,13 +93,13 @@ def _build_custom_openai(settings: Settings) -> BaseChatModel:
 def _build_custom_anthropic(settings: Settings) -> BaseChatModel:
     from langchain_anthropic import ChatAnthropic
 
+    api_key = _require(settings.custom_anthropic_api_key, "CUSTOM_ANTHROPIC_API_KEY")
+    headers = _parse_headers(settings.custom_anthropic_extra_headers, "CUSTOM_ANTHROPIC_EXTRA_HEADERS")
     return ChatAnthropic(
         model=_require(settings.custom_anthropic_model, "CUSTOM_ANTHROPIC_MODEL"),
-        api_key=_require(settings.custom_anthropic_api_key, "CUSTOM_ANTHROPIC_API_KEY"),
+        api_key=api_key,
         base_url=_require(settings.custom_anthropic_base_url, "CUSTOM_ANTHROPIC_BASE_URL"),
-        default_headers=_parse_headers(
-            settings.custom_anthropic_extra_headers, "CUSTOM_ANTHROPIC_EXTRA_HEADERS"
-        ),
+        default_headers=_substitute_api_key(headers, api_key),
         **_common_kwargs(settings),
     )
 
