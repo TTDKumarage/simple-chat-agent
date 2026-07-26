@@ -8,7 +8,7 @@ from enum import Enum
 from functools import lru_cache
 from typing import Optional
 
-from pydantic import Field, model_validator
+from pydantic import AliasChoices, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -69,7 +69,13 @@ class Settings(BaseSettings):
     # --- OpenAI ----------------------------------------------------------
     openai_api_key: Optional[str] = None
     openai_model: str = "gpt-4o-mini"
-    openai_base_url: Optional[str] = None  # rarely needed; escape hatch
+    # Rarely needed; escape hatch for pointing at an OpenAI-compatible engine
+    # other than api.openai.com. OPENAI_URL is accepted as an alias for
+    # OPENAI_BASE_URL since that's the name some deployment tooling expects.
+    openai_base_url: Optional[str] = Field(
+        default=None,
+        validation_alias=AliasChoices("openai_base_url", "openai_url"),
+    )
 
     # --- Anthropic ---------------------------------------------------------
     anthropic_api_key: Optional[str] = None
