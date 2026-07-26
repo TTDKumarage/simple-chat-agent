@@ -106,6 +106,10 @@ class Settings(BaseSettings):
     # --- Pinecone knowledge base -------------------------------------------
     pinecone_api_key: Optional[str] = None
     pinecone_index_name: Optional[str] = None
+    # Direct index host (from the Pinecone console) - when set, connects
+    # straight to that index and skips the by-name control-plane lookup in
+    # _ensure_index(), which API keys scoped to a single index can't call.
+    pinecone_host: Optional[str] = None
     pinecone_namespace: Optional[str] = None
     pinecone_cloud: str = "aws"
     pinecone_region: str = "us-east-1"
@@ -126,7 +130,7 @@ class Settings(BaseSettings):
 
     @property
     def rag_enabled(self) -> bool:
-        return bool(self.pinecone_api_key and self.pinecone_index_name)
+        return bool(self.pinecone_api_key and (self.pinecone_index_name or self.pinecone_host))
 
     def active_model_name(self) -> str:
         """Return the model name that will actually be used for the active provider."""

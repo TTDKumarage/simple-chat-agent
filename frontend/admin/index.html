@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin — Knowledge Base &amp; Frontend Config</title>
+<link rel="stylesheet" href="/admin/static/admin.css" />
+</head>
+<body>
+
+<header class="admin-header">
+  <div class="title">Simple Chat Agent <span>Admin</span></div>
+  <div class="links">
+    <a href="/banking" target="_blank">Banking site ↗</a>
+    <a href="/insurance" target="_blank">Insurance site ↗</a>
+    <a href="/" target="_blank">Standalone chat ↗</a>
+  </div>
+</header>
+
+<div class="admin-container">
+
+  <div class="tab-switch">
+    <button type="button" class="active" data-panel="panel-kb">Knowledge Base</button>
+    <button type="button" data-panel="panel-frontend">Frontends</button>
+  </div>
+
+  <!-- ================= KNOWLEDGE BASE TAB ================= -->
+  <div class="panel active" id="panel-kb">
+    <div class="card">
+      <h2>Embed documents into Pinecone</h2>
+      <p class="subtitle">Pick which site's knowledge base you're updating, point it at a Pinecone index, then drop in the files to embed.</p>
+
+      <div class="security-note">
+        Save persists these connection settings on the server (in plaintext) so you don't have to retype them next
+        time. Skip Save to use them for this session only.
+      </div>
+
+      <form id="kb-form">
+        <div class="section-label">Knowledge base type</div>
+        <div class="field">
+          <label for="kb-type">Site</label>
+          <select id="kb-type"></select>
+        </div>
+
+        <div class="section-label">Pinecone connection</div>
+        <div class="field-row">
+          <div class="field">
+            <label for="kb-api-key">Pinecone API key</label>
+            <input type="password" id="kb-api-key" placeholder="pc-..." required />
+          </div>
+          <div class="field">
+            <label for="kb-index">Index name</label>
+            <input type="text" id="kb-index" placeholder="e.g. site-knowledge-base" />
+            <div class="hint">Required unless a host is given below.</div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="kb-host">Pinecone host (optional)</label>
+          <input type="text" id="kb-host" placeholder="e.g. https://agent-knowledgebase-o6ulsrl.svc.aped-4627-b74a.pinecone.io" />
+          <div class="hint">
+            Paste this from the Pinecone console if you have it — it connects directly to that index and skips
+            the index name lookup, which is required for API keys scoped to a single index. When set, it takes
+            priority over index name / cloud / region / "create if missing" below.
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="kb-namespace">Namespace</label>
+            <input type="text" id="kb-namespace" placeholder="e.g. banking" />
+            <div class="hint">Defaults to the selected site type; edit if you use a different scheme.</div>
+          </div>
+          <div class="field">
+            <label for="kb-cloud">Cloud / Region</label>
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="kb-cloud" value="aws" placeholder="aws" />
+              <input type="text" id="kb-region" value="us-east-1" placeholder="us-east-1" />
+            </div>
+            <div class="hint">Only used to create the index by name (ignored if a host is set).</div>
+          </div>
+        </div>
+        <div class="checkbox-field">
+          <input type="checkbox" id="kb-create-if-missing" checked />
+          <label for="kb-create-if-missing">Create the index if it doesn't exist yet</label>
+        </div>
+
+        <div class="section-label">Embedding model</div>
+        <div class="field-row">
+          <div class="field">
+            <label for="kb-embedding-model">Model</label>
+            <input type="text" id="kb-embedding-model" value="text-embedding-3-small" />
+          </div>
+          <div class="field">
+            <label for="kb-embedding-dim">Dimension</label>
+            <input type="number" id="kb-embedding-dim" value="1536" />
+            <div class="hint">Only used to create a new index. An existing index is always embedded at its own dimension.</div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="kb-embedding-key">Embedding API key (optional)</label>
+          <input type="password" id="kb-embedding-key" placeholder="Leave blank to use the server's OPENAI_API_KEY" />
+        </div>
+
+        <div class="actions-row">
+          <button type="button" class="btn" id="kb-save">Save settings</button>
+          <button type="button" class="btn btn-secondary" id="kb-reset">Reset</button>
+          <button type="button" class="btn btn-secondary" id="kb-clear">Clear</button>
+        </div>
+        <div class="result-banner" id="kb-settings-result"></div>
+
+        <div class="section-label">Files</div>
+        <div class="dropzone" id="dropzone">
+          <div class="dz-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <div class="dz-text">Drag &amp; drop files here, or click to browse</div>
+          <div class="dz-hint">Supported: .md, .txt, .json</div>
+          <input type="file" id="file-input" multiple accept=".md,.markdown,.txt,.json" hidden />
+        </div>
+        <div class="file-list" id="file-list"></div>
+
+        <div class="actions-row">
+          <button type="submit" class="btn" id="kb-submit">Embed files</button>
+        </div>
+        <div class="result-banner" id="kb-result"></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Manage embedded files</h2>
+      <p class="subtitle">Uses the Pinecone connection filled in above (API key, index name/host, namespace).</p>
+
+      <div class="actions-row">
+        <button type="button" class="btn btn-secondary" id="kb-load-files">Load embedded files</button>
+      </div>
+      <div class="result-banner" id="kb-files-result"></div>
+      <div class="file-list" id="embedded-file-list"></div>
+    </div>
+  </div>
+
+  <!-- ================= FRONTENDS TAB ================= -->
+  <div class="panel" id="panel-frontend">
+    <div class="card">
+      <h2>Chat widget configuration</h2>
+      <p class="subtitle">Set which backend each site's chat widget talks to, and its greeting message. Takes effect immediately — no redeploy.</p>
+
+      <form id="fe-form">
+        <div class="section-label">Site</div>
+        <div class="field">
+          <label for="fe-type">Site</label>
+          <select id="fe-type"></select>
+        </div>
+
+        <div class="field">
+          <label for="fe-brand">Brand (fixed per site)</label>
+          <input type="text" id="fe-brand" disabled />
+        </div>
+
+        <div class="field">
+          <label for="fe-api-base">Chatbot base path</label>
+          <input type="text" id="fe-api-base" placeholder="Leave blank to call the same origin the page loaded from" />
+          <div class="hint">e.g. https://banking-chat-api.example.com — used as the prefix for /api/chat/stream, /api/config, /api/reset.</div>
+        </div>
+
+        <div class="field">
+          <label for="fe-greeting">Greeting message</label>
+          <textarea id="fe-greeting" rows="3"></textarea>
+        </div>
+
+        <div class="section-label">WSO2 Agent Manager gateway</div>
+        <div class="checkbox-field">
+          <input type="checkbox" id="fe-use-gateway-key" />
+          <label for="fe-use-gateway-key">Route through the gateway (send an X-API-Key header with every request)</label>
+        </div>
+        <div class="field" id="fe-api-key-field" style="display:none;">
+          <label for="fe-api-key">Gateway API key</label>
+          <input type="password" id="fe-api-key" placeholder="e.g. a875981ab806af8ad0d4b530e4d8e056bb3738451ae2fdb6d69f12f429d7db0e" />
+          <div class="hint">Sent as the X-API-Key header on every /api/chat/stream and /api/reset request from this site's widget.</div>
+        </div>
+
+        <div class="actions-row">
+          <button type="submit" class="btn" id="fe-submit">Save changes</button>
+          <a class="btn btn-secondary" id="fe-view-link" href="#" target="_blank">View live site ↗</a>
+        </div>
+        <div class="result-banner" id="fe-result"></div>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<script src="/admin/static/admin.js"></script>
+</body>
+</html>

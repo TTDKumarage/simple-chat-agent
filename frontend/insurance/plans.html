@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Plans — Havenwell Assurance Group</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/insurance/static/insurance.css" />
+</head>
+<body>
+
+<div class="disclaimer-strip">Demo site: Havenwell Assurance Group is a fictitious insurer. All premiums shown are illustrative sample data.</div>
+
+<nav class="navbar">
+  <div class="container">
+    <a href="/insurance" class="brand"><span class="mark">H</span> Havenwell Assurance</a>
+    <div class="nav-links">
+      <a href="/insurance">Home</a>
+      <a href="/insurance/plans" class="active">Plans</a>
+      <a href="/insurance/about">About</a>
+    </div>
+    <div class="nav-cta">
+      <a href="#life" class="btn btn-primary btn-sm">Get a Quote</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero page-hero" style="background-image:url('https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&w=1600&q=75')">
+  <div class="container">
+    <span class="hero-eyebrow">Plans</span>
+    <h1>Life, health, motor &amp; home — compared side by side.</h1>
+    <p class="lead">See coverage, premiums, eligibility, and the add-ons that actually matter before you buy.</p>
+  </div>
+</header>
+
+<section class="section section-alt">
+  <div class="container">
+
+    <div class="tab-buttons">
+      <button class="tab-btn active" data-tab="life">Life Insurance</button>
+      <button class="tab-btn" data-tab="health">Health Insurance</button>
+      <button class="tab-btn" data-tab="motor">Motor Insurance</button>
+      <button class="tab-btn" data-tab="home">Home Insurance</button>
+    </div>
+
+    <!-- LIFE INSURANCE -->
+    <div class="tab-panel active" id="life">
+      <div class="grid grid-2" style="align-items:center; margin-bottom:36px;">
+        <div>
+          <span class="eyebrow">Life Insurance</span>
+          <h2>Protection for the people who depend on you</h2>
+          <p>Term and whole life plans, with optional riders for critical illness and accidental death.</p>
+        </div>
+        <div class="img-card">
+          <img src="https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&w=800&q=75" alt="Family holding hands" />
+        </div>
+      </div>
+
+      <div class="table-wrap" style="margin-bottom:26px;">
+        <table>
+          <thead><tr><th>Plan</th><th>Coverage</th><th>Term</th><th>Indicative Annual Premium</th></tr></thead>
+          <tbody>
+            <tr><td>Term Life Essential</td><td>$50,000 – $500,000</td><td>5 – 30 years</td><td>$180 – $1,200/yr</td></tr>
+            <tr><td>Term Life Plus (with riders)</td><td>$50,000 – $1,000,000</td><td>5 – 30 years</td><td>$260 – $1,900/yr</td></tr>
+            <tr><td>Whole Life Secure</td><td>$25,000 – $250,000</td><td>Lifetime (premiums to age 65)</td><td>$600 – $3,400/yr</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Item</th><th>Detail</th></tr></thead>
+          <tbody>
+            <tr><td>Eligibility</td><td>Age 18–65 at entry (Term); 18–55 at entry (Whole Life)</td></tr>
+            <tr><td>Medical exam</td><td>Required for sums assured above $300,000, or applicants over age 45</td></tr>
+            <tr><td>Riders available</td><td>Accidental death benefit (+25% payout), critical illness rider, waiver of premium on disability</td></tr>
+            <tr><td>Free-look period</td><td>15 days from policy issue</td></tr>
+            <tr><td>Claim settlement</td><td>Average 12 business days from complete documentation</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="perk-banner">
+        <div class="icon">🎁</div>
+        <div><strong>Bundled perk:</strong> Term Life Plus policyholders get one free annual health screening and access to a 24/7 tele-health consultation line.</div>
+      </div>
+    </div>
+
+    <!-- HEALTH INSURANCE -->
+    <div class="tab-panel" id="health">
+      <div class="grid grid-2" style="align-items:center; margin-bottom:36px;">
+        <div>
+          <span class="eyebrow">Health Insurance</span>
+          <h2>Individual &amp; family floater cover</h2>
+          <p>3,400+ cashless partner hospitals, with wellness rewards for healthy vitals.</p>
+        </div>
+        <div class="img-card">
+          <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=75" alt="Doctor consultation" />
+        </div>
+      </div>
+
+      <div class="table-wrap" style="margin-bottom:26px;">
+        <table>
+          <thead><tr><th>Plan</th><th>Sum Insured</th><th>Premium (Individual, age 30)</th><th>Premium (Family Floater, 2+2)</th></tr></thead>
+          <tbody>
+            <tr><td>Basic Care</td><td>$10,000</td><td>$220/yr</td><td>$540/yr</td></tr>
+            <tr><td>Comprehensive Care</td><td>$25,000</td><td>$410/yr</td><td>$980/yr</td></tr>
+            <tr><td>Premium Care</td><td>$50,000</td><td>$690/yr</td><td>$1,650/yr</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Item</th><th>Detail</th></tr></thead>
+          <tbody>
+            <tr><td>Eligibility</td><td>Age 18–65 at entry (renewable for life once enrolled); dependents 91 days – 25 years</td></tr>
+            <tr><td>Waiting period</td><td>30 days general illness · 2 years named pre-existing conditions · 4 years specific procedures (e.g. joint replacement)</td></tr>
+            <tr><td>Room rent limit</td><td>Up to 2% of sum insured/day (Basic/Comprehensive); no sub-limit on Premium Care</td></tr>
+            <tr><td>Co-payment</td><td>10% for policyholders entering after age 60</td></tr>
+            <tr><td>Cashless network</td><td>3,400+ partner hospitals</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="perk-banner">
+        <div class="icon">🎁</div>
+        <div><strong>Bundled perk:</strong> Comprehensive Care and Premium Care include a free annual health checkup per adult, plus wellness rewards worth up to 10% off your premium.</div>
+      </div>
+    </div>
+
+    <!-- MOTOR INSURANCE -->
+    <div class="tab-panel" id="motor">
+      <div class="grid grid-2" style="align-items:center; margin-bottom:36px;">
+        <div>
+          <span class="eyebrow">Motor Insurance</span>
+          <h2>Third-party or full comprehensive cover</h2>
+          <p>Add zero-depreciation, roadside assistance, or engine protection for extra peace of mind.</p>
+        </div>
+        <div class="img-card">
+          <img src="https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=800&q=75" alt="Insured car" />
+        </div>
+      </div>
+
+      <div class="table-wrap" style="margin-bottom:26px;">
+        <table>
+          <thead><tr><th>Plan</th><th>Coverage</th><th>Indicative Annual Premium (mid-size sedan)</th></tr></thead>
+          <tbody>
+            <tr><td>Third-Party Only</td><td>Legal liability to third parties (mandatory minimum cover)</td><td>$60 – $90/yr</td></tr>
+            <tr><td>Comprehensive</td><td>Third-party + own-damage (fire, theft, accident, natural disaster)</td><td>$220 – $480/yr</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Item</th><th>Detail</th></tr></thead>
+          <tbody>
+            <tr><td>Eligibility</td><td>Valid driving license; vehicle age up to 15 years for comprehensive cover</td></tr>
+            <tr><td>No-claim bonus (NCB)</td><td>20% after 1 claim-free year, up to 50% after 5 claim-free years</td></tr>
+            <tr><td>Deductible</td><td>Compulsory $50; voluntary deductible option up to $250 (lowers premium)</td></tr>
+            <tr><td>Add-ons available</td><td>Zero depreciation (+15%), roadside assistance (+$8/yr), engine protection (+$12/yr), return-to-invoice (+10%)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="perk-banner">
+        <div class="icon">🎁</div>
+        <div><strong>Bundled perk:</strong> Pair comprehensive motor with a Havenwell home insurance policy for a 12% multi-policy discount on both premiums. Silverpine Trust Bank car loan customers also get a 15% discount voucher toward this product.</div>
+      </div>
+    </div>
+
+    <!-- HOME INSURANCE -->
+    <div class="tab-panel" id="home">
+      <div class="grid grid-2" style="align-items:center; margin-bottom:36px;">
+        <div>
+          <span class="eyebrow">Home Insurance</span>
+          <h2>Structure &amp; contents cover</h2>
+          <p>For owners and renters alike, with discounts for security systems and smoke alarms.</p>
+        </div>
+        <div class="img-card">
+          <img src="https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?auto=format&fit=crop&w=800&q=75" alt="Home protection planning" />
+        </div>
+      </div>
+
+      <div class="table-wrap" style="margin-bottom:26px;">
+        <table>
+          <thead><tr><th>Plan</th><th>Coverage</th><th>Indicative Annual Premium</th></tr></thead>
+          <tbody>
+            <tr><td>Structure Only</td><td>Rebuild cost of the physical structure</td><td>$80 – $250/yr</td></tr>
+            <tr><td>Structure + Contents</td><td>Structure plus furniture, appliances, and personal belongings</td><td>$140 – $400/yr</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Item</th><th>Detail</th></tr></thead>
+          <tbody>
+            <tr><td>Eligibility</td><td>Owner-occupied or rented (contents-only cover available for tenants)</td></tr>
+            <tr><td>Coverage triggers</td><td>Fire, storm, flood, theft, burglary, and accidental damage (contents)</td></tr>
+            <tr><td>Deductible</td><td>Standard $100 per claim</td></tr>
+            <tr><td>Valuation</td><td>Sum insured based on reinstatement value, reassessed every 3 years</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="perk-banner">
+        <div class="icon">🎁</div>
+        <div><strong>Bundled perk:</strong> Structure + Contents policyholders get a free annual home safety inspection and up to 8% off for installed security systems or smoke alarms.</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="cta-banner">
+      <div>
+        <h2>Not sure which plan fits?</h2>
+        <p>Chat with us — look for the message icon in the corner of your screen — for a quick comparison of coverage and premiums.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="grid grid-4">
+      <div>
+        <div class="brand"><span class="mark">H</span> Havenwell Assurance</div>
+        <p>Protection plans that people actually understand, since 1991.</p>
+      </div>
+      <div>
+        <h4>Insurance</h4>
+        <a href="/insurance/plans#life">Life Insurance</a>
+        <a href="/insurance/plans#health">Health Insurance</a>
+        <a href="/insurance/plans#motor">Motor Insurance</a>
+        <a href="/insurance/plans#home">Home Insurance</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="/insurance/about">About Us</a>
+        <a href="/banking">Silverpine Trust Bank</a>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <a href="tel:08005550198">0800-555-0198</a>
+        <a href="mailto:hello@havenwellassurance.example">hello@havenwellassurance.example</a>
+        <span style="display:block;font-size:14px;">27 Havenwell Court, Brackenridge</span>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 Havenwell Assurance Group. Fictitious brand created for demo purposes only.</span>
+      <span>Licensed by the Bureau of Insurance Oversight, Kestria (fictitious).</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/insurance/static/insurance.js"></script>
+<script src="/insurance/chat-config.js"></script>
+<script src="/static/chat-widget.js"></script>
+</body>
+</html>

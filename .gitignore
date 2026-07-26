@@ -8,3 +8,6 @@ venv/
 .pytest_cache/
 .mypy_cache/
 .DS_Store
+
+# Admin-panel-managed runtime state (Pinecone/gateway credentials saved via /admin)
+app/data/

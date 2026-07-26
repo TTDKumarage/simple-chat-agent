@@ -1,9 +1,10 @@
 """Pinecone-backed knowledge base used for retrieval-augmented generation.
 
-The knowledge base is entirely optional. If PINECONE_API_KEY and
-PINECONE_INDEX_NAME aren't both set, `get_retriever()` returns None and the
-chat service falls back to plain conversation with no retrieval step -
-useful for local development or deployments that don't need RAG.
+The knowledge base is entirely optional. If PINECONE_API_KEY isn't set, or
+neither PINECONE_INDEX_NAME nor PINECONE_HOST is set, `get_retriever()`
+returns None and the chat service falls back to plain conversation with no
+retrieval step - useful for local development or deployments that don't need
+RAG.
 """
 from functools import lru_cache
 from typing import Optional
@@ -16,13 +17,14 @@ from app.core.errors import ConfigurationError as LLMConfigurationError
 from app.core.errors import require as _require
 
 
-def build_embeddings(settings: Settings) -> Embeddings:
+def build_embeddings(settings: Settings, dimensions: Optional[int] = None) -> Embeddings:
     if settings.embedding_provider == EmbeddingProvider.OPENAI:
         from langchain_openai import OpenAIEmbeddings
 
         return OpenAIEmbeddings(
             model=settings.embedding_model,
             api_key=_require(settings.embedding_api_key, "OPENAI_API_KEY or EMBEDDING_API_KEY"),
+            dimensions=dimensions,
         )
 
     if settings.embedding_provider == EmbeddingProvider.CUSTOM_OPENAI:
@@ -32,6 +34,7 @@ def build_embeddings(settings: Settings) -> Embeddings:
             model=settings.embedding_model,
             api_key=_require(settings.embedding_api_key, "EMBEDDING_API_KEY"),
             base_url=_require(settings.embedding_base_url, "EMBEDDING_BASE_URL"),
+            dimensions=dimensions,
         )
 
     raise LLMConfigurationError(f"Unsupported EMBEDDING_PROVIDER: {settings.embedding_provider}")
@@ -60,8 +63,35 @@ def _ensure_index(settings: Settings) -> None:
 def build_vector_store(settings: Settings):
     from langchain_pinecone import PineconeVectorStore
 
-    _ensure_index(settings)
-    embeddings = build_embeddings(settings)
+    from app.services.pinecone_connection import PineconeConnection, index_dimension
+
+    if settings.pinecone_host:
+        # Connecting straight to the host skips _ensure_index()'s control-plane
+        # list/create calls - needed for API keys scoped to a single index.
+        conn = PineconeConnection(
+            pinecone_api_key=settings.pinecone_api_key,
+            pinecone_host=settings.pinecone_host,
+        )
+    else:
+        _ensure_index(settings)
+        conn = PineconeConnection(
+            pinecone_api_key=settings.pinecone_api_key,
+            pinecone_index_name=settings.pinecone_index_name,
+        )
+
+    # Embed queries at the index's *actual* dimension - it only matches
+    # EMBEDDING_DIMENSION when the index was just created from that same
+    # value, and a mismatch here fails every retrieval, not just the setup.
+    target_dimension = index_dimension(conn)
+    embeddings = build_embeddings(settings, dimensions=target_dimension)
+
+    if settings.pinecone_host:
+        return PineconeVectorStore(
+            host=settings.pinecone_host,
+            embedding=embeddings,
+            namespace=settings.pinecone_namespace,
+            pinecone_api_key=settings.pinecone_api_key,
+        )
     return PineconeVectorStore(
         index_name=settings.pinecone_index_name,
         embedding=embeddings,
